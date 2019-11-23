@@ -36,59 +36,39 @@ def send_message(users,message,browser):
 		message_sent = {}
 		jsonfile = open(actual_path+'/messages_sent.json', 'a')
 		usehere(browser)
-
-		if (type(message)==list):
-			i = 0
-			for user in users:
-				try:	
-					#search
-					to_user = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="side"]/div[1]/div/label/input')))
-					to_user.send_keys(user)
-					time.sleep(2)
-					to_user.send_keys(Keys.ENTER)
-					time.sleep(2)
-					#type the message
-					field_message = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')))
+		i = 0
+		for user in users:
+			try:
+				#search
+				to_user = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="side"]/div[1]/div/label/input')))
+				to_user.send_keys(user)
+				time.sleep(2)
+				to_user.send_keys(Keys.ENTER)
+				time.sleep(2)
+				#type the message
+				field_message = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')))
+				if (type(message)==list):
 					field_message.send_keys(message[i])
-					send = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[3]/button/span')))
-					send.click()
-					time.sleep(2)
 					#log
 					message_sent.update({'username': user,'message': message[i]})
 					json.dump(message_sent, jsonfile)
 					jsonfile.write('\n')
-					i += 1
-				except Exception as e:
-					print('Error to send message to '+user+': '+str(e))
-					message_sent.update({'username': user,'error': str(e)})
-					json.dump(message_sent, jsonfile)
-					jsonfile.write('\n')			
-			jsonfile.close()
-		else:		
-			for user in users:
-				try:
-					#search
-					to_user = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="side"]/div[1]/div/label/input')))
-					to_user.send_keys(user)
-					time.sleep(2)
-					to_user.send_keys(Keys.ENTER)
-					time.sleep(2)
-					#type the message
-					field_message = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')))
+				else:
 					field_message.send_keys(message)
-					send = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[3]/button/span')))
-					send.click()
-					time.sleep(2)
 					#log
 					message_sent.update({'username': user,'message': message})
 					json.dump(message_sent, jsonfile)
 					jsonfile.write('\n')
-				except Exception as e:
-					print('Error to send message to '+user+': '+str(e))
-					message_sent.update({'username': user,'error': str(e)})
-					json.dump(message_sent, jsonfile)
-					jsonfile.write('\n')
-			jsonfile.close()
+				send = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[3]/button/span')))
+				send.click()
+				time.sleep(2)
+				i += 1
+			except Exception as e:
+				print('Error to send message to '+user+': '+str(e))
+				message_sent.update({'username': user,'error': str(e)})
+				json.dump(message_sent, jsonfile)
+				jsonfile.write('\n')
+		jsonfile.close()
 	except Exception as e:
 		print('Error to send: '+str(e))
 
