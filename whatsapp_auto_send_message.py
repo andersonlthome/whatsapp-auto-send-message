@@ -16,12 +16,12 @@ actual_path = os.path.abspath(os.path.dirname(__file__))
 def login():
 	#browser = webdriver.Firefox(executable_path = 'C:/Users/Anderson/Desktop/programas/geckodriver.exe')
 	browser = webdriver.Chrome('chromedriver.exe') # start an instance
-	browser.get('https://web.whatsapp.com/') 
+	browser.get('https://web.whatsapp.com/')
 	time.sleep(2)
 	input('After login with QrCode press Enter')
 	return browser
 
-#if at time theres another Web WhatsApp open, click in Use Here 
+#if at time theres another Web WhatsApp open, click in Use Here
 def usehere(browser):
 	try:
 		btn_usehere = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div/div/div/div/div/div/div[2]/div[2]')))
@@ -29,15 +29,15 @@ def usehere(browser):
 	except Exception as e:
 		print('Already logged in or error: '+e)
 
-def send_message(users,message,browser):	
+def send_message(browser,users,messages,qnt_messages):
 	try:
-		browser.get('https://web.whatsapp.com/') 
+		browser.get('https://web.whatsapp.com/')
 		time.sleep(2)
 		message_sent = {}
 		jsonfile = open(actual_path+'/messages_sent.json', 'a')
 		usehere(browser)
 		i = 0
-		for user in users:
+		for index, user in enumerate(users):
 			try:
 				#search
 				to_user = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="side"]/div[1]/div/label/input')))
@@ -47,21 +47,15 @@ def send_message(users,message,browser):
 				time.sleep(2)
 				#type the message
 				field_message = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')))
-				if (type(message)==list):
-					field_message.send_keys(message[i])
+				for i in range(qnt_messages):
+					field_message.send_keys(messages[index][i])
+					send = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[3]/button/span')))
+					send.click()
+					time.sleep(2)
 					#log
-					message_sent.update({'username': user,'message': message[i]})
+					message_sent.update({'username': user,'message': messages[index][i]})
 					json.dump(message_sent, jsonfile)
 					jsonfile.write('\n')
-				else:
-					field_message.send_keys(message)
-					#log
-					message_sent.update({'username': user,'message': message})
-					json.dump(message_sent, jsonfile)
-					jsonfile.write('\n')
-				send = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[3]/button/span')))
-				send.click()
-				time.sleep(2)
 				i += 1
 			except Exception as e:
 				print('Error to send message to '+user+': '+str(e))
@@ -77,9 +71,12 @@ def main():
 	#you have to put names that exists in your WhatsApp contacts
 	users = ['andersonlthome','erick']
 	messages = []
-	for user in users:
-		messages.append('Good afternoon '+user+', fine?')
-	send_message(users,messages,browser)
+	qnt_messages = 2
+	for index, user in enumerate(users):
+		messages.append([])
+		messages[index].append('Good afternoon '+user+', fine?')
+		messages[index].append('message 2')
+	send_message(browser,users,messages,qnt_messages)
 	browser.quit()
 
 if __name__ == '__main__':
